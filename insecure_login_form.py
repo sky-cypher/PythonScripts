@@ -25,9 +25,10 @@ def login(*args):
         messagebox.showerror('Denied','Incorrect username')
         return None
     if users[username.get()] != password.get():
-       messagebox.showerror('Denied','Incorrect password')
-       return None
+        messagebox.showerror('Denied','Incorrect password')
+        return None
     messagebox.showinfo('Granted','Login sucessful')
+    trials_left = 3
 
 
 def clear():
