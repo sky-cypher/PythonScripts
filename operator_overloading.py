@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-class number:
+class Number:
     def __init__(self, value = 0):
         self.value = value
     def __del__(self):
