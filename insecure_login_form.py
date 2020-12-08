@@ -56,4 +56,5 @@ user_ety.bind('<Return>', lambda x : pass_ety.focus_set())
 pass_ety.bind('<Return>', login)
 
 #start
-window.mainloop()
+if __name__ == '__main__':
+    window.mainloop()
