@@ -12,3 +12,5 @@ demo of inheritence
 login form with plain password
 ## xor\_decrypt\_jpg.py
 decrypt a jpg file which is encryped by xor method
+## sudoku\_solver.py
+sudoku solver using backtracking
