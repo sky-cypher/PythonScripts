@@ -36,6 +36,7 @@ def check(row, column, value):
                 return False
     return True
 
+
 def print_puzzle(row = None, column = None, add = None, final = False):
     global display_time
     display_time += delay
@@ -77,15 +78,16 @@ def solve():
                         puzzle[row][column] = 0
                         print_puzzle(row, column, False)
                 return 
-    print_puzzle()
     global end_time, start_time
     end_time = time()
+    print_puzzle(final = True)
     if 'n' in input("\ncontinue ? : ").lower():
         raise KeyboardInterrupt
     start_time += time() - end_time
 
 
-if __name__ == "__main__":
+def main():
+    global delay, puzzle, start_time
     try:
         delay = float(input("Enter delay in seconds : "))
     except ValueError:
@@ -94,9 +96,10 @@ if __name__ == "__main__":
     while 'n' in input("Use defined sudoku ? : ").lower():
         for i in range(9):
             puzzle[i] = [int(x) for x in input(f"Enter row {i + 1} : ")]
-            if 9 != len(puzzle[i]):
-                puzzle[i] = [ x*0 for x in range(9) ]
-                continue
+            while len(puzzle[i]) < 9:
+                puzzle[i].append(0)
+            while len(puzzle[i]) > 9:
+                puzzle[i].pop(-1)
         print_puzzle()
     start_time = time()
     try:
@@ -106,8 +109,11 @@ if __name__ == "__main__":
         quit()
     finally:
         if end_time:
-            tat = end_time - start_time
+            tat = abs(end_time - start_time)
             print(f"Time Required = {round(tat,4)} seconds\
                     \nDisplay time = {round(display_time, 4)}\
-                    \nNet time = {round(tat - display_time, 4)}")
+                    \nNet time = {round(tat - display_time, 4)}\n")
 
+
+if __name__ == "__main__":
+    main()
