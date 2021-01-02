@@ -11,7 +11,7 @@ def create_class(class_name: str):
     def_class = f"""
 class {class_name}:
     def __str__(self):
-        return 'Welcome to world of {name}'
+        return 'Object of {name}'
 """
     with open(file_name, 'a') as f:
         f.write(def_class)
