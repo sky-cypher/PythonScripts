@@ -1,106 +1,81 @@
 #!/usr/bin/env python3
-from colorama import Fore, Style, init
-from time import sleep, time
-from os import system
+from rich import print
+import numpy as np
+from time import time
 
-sudoku = [ [ y*0 for y in range(9) ] for x in range(9) ]
-init(autoreset = True)
+'''
+puzzle = [
+        [0, 1, 8, 9, 0, 0, 0, 0, 0],
+        [5, 2, 0, 0, 4, 0, 0, 0, 3],
+        [0, 0, 0, 0, 0, 3, 5, 1, 0],
+        [0, 0, 0, 0, 9, 0, 0, 5, 0],
+        [8, 0, 0, 0, 0, 0, 0, 0, 2],
+        [0, 7, 0, 0, 1, 0, 0, 0, 0],
+        [0, 9, 2, 6, 0, 0, 0, 0, 0],
+        [1, 0, 0, 0, 5, 0, 0, 8, 6],
+        [0, 0, 0, 0, 0, 4, 1, 2, 0],]
+'''
+
+puzzle = [ [ y*0 for y in range(9) ] for x in range(9) ]
+sudoku = np.matrix(puzzle)
 start_time = 0
 end_time = 0
-display_time = 0.0
 
 def check(row, column, value):
-    if value in sudoku[row][:]:
+    if value in sudoku[row,:]:
         return False
     for i in range(9):
-        if value == sudoku[i][column]:
+        if value == sudoku[i,column]:
             return False
     blk_row = (row//3)*3
     blk_column = (column//3)*3
     for x in range(blk_row, blk_row + 3):
         for y in range(blk_column, blk_column + 3):
-            if sudoku[x][y] == value:
+            if sudoku[x,y] == value:
                 return False
     return True
-
-
-def print_sudoku(row = None, column = None, add = None, final = False):
-    global display_time
-    display_time += delay
-    sleep(delay)
-    system('clear')
-    not final and print('\n' * 6)
-    for x in range(9):
-        if x % 3 :
-            print('\n\t', end = '')
-        else:
-            print(f'\n\t{"-" * 23}\n\t', end = '')
-        for y in range(9):
-            if y % 3 :
-                s = ""
-            else:
-                s = "| "
-            if (row == x and y == column) or final:
-                if add or end_time:
-                    print(f"{s}{Fore.GREEN}{sudoku[x][y]} ", end = '')
-                else:
-                    print(f"{s}{Fore.RED}{sudoku[x][y]} ", end = '')
-            else:
-                if not sudoku[x][y]:
-                    print(f"{s}{Fore.BLUE}{sudoku[x][y]} ", end = '')
-                else:
-                    print(f"{s}{Fore.YELLOW}{sudoku[x][y]} ", end = '')
-    print('\n')
 
 def solve():
     global sudoku
     for row in range(9):
         for column in range(9):
-            if not sudoku[row][column]:
+            if not sudoku[row, column]:
                 for value in range(1,10):
                     if check(row, column, value):
-                        sudoku[row][column] = value
-                        print_sudoku(row, column, True)
+                        sudoku[row, column] = value
                         solve()
-                        sudoku[row][column] = 0
-                        print_sudoku(row, column, False)
+                        sudoku[row, column] = 0
                 return
     global end_time, start_time
     end_time = time()
-    print_sudoku(final = True)
+    print(f"\n[bold green]{sudoku}[/bold green]")
     if 'n' in input("\ncontinue ? : ").lower():
-        raise KeyboardInterrupt
+        quit()
     start_time += time() - end_time
 
 
 def main():
-    global delay, sudoku, start_time
-    try:
-        delay = float(input("Enter delay in seconds : "))
-    except ValueError:
-        delay = 0.01
-    print_sudoku()
+    global sudoku, start_time
+    print(sudoku)
     while 'n' in input("Use defined sudoku ? : ").lower():
         for i in range(9):
-            sudoku[i] = [int(x) for x in input(f"Enter row {i + 1} : ")]
-            while len(sudoku[i]) < 9:
-                sudoku[i].append(0)
-            while len(sudoku[i]) > 9:
-                sudoku[i].pop(-1)
-        print_sudoku()
+            puzzle[i] = [int(x) for x in input(f"Enter row {i + 1} : ")]
+            while len(puzzle[i]) < 9:
+                puzzle[i].append(0)
+            while len(puzzle[i]) > 9:
+                puzzle[i].pop(-1)
+        sudoku = np.matrix(puzzle)
+        print(sudoku)
     start_time = time()
     try:
         solve()
     except KeyboardInterrupt:
-       print_sudoku(final = True)
+        print(sudoku)
         quit()
     finally:
         if end_time:
             tat = abs(end_time - start_time)
-            print(f"Time Required = {round(tat,4)} seconds\
-                    \nDisplay time = {round(display_time, 4)}\
-                    \nNet time = {round(tat - display_time, 4)}\n")
-
+            print(f"Time Required = {round(tat,4)} seconds")
 
 if __name__ == "__main__":
     main()
