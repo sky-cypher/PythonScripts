@@ -36,13 +36,15 @@ def print_sudoku():
         if x % 3 :
             print('\n\t', end = '')
         else:
-            print(f'\n\t{"-" * 23}\n\t', end = '')
+            print(f'\n\t{"-" * 25}\n\t', end = '')
         for y in range(9):
             if y % 3 :
                 s = ""
             else:
                 s = "| "
             print(f"{s}{puzzle[x][y]} ", end = '')
+            if y == 8: print("|", end = '')
+    print(f'\n\t{"-" * 25}\n\t', end = '')
     print('\n')
 
 
@@ -81,7 +83,7 @@ def solve():
 
 def main():
     global sudoku, start_time
-    print(sudoku)
+    print_sudoku()
     if 'n' not in input("Get puzzle from file ? : ").lower():
         file_path = input("Enter file name : ")
         if not file_path:
@@ -90,7 +92,7 @@ def main():
             for i, line in enumerate(file.readlines()):
                 puzzle[i] = [ int(x) for x in line.split() ]
         sudoku = np.matrix(puzzle)
-        print(sudoku)
+        print_sudoku()
     while 'n' in input("Use defined sudoku ? : ").lower():
         for i in range(9):
             puzzle[i] = [int(x) for x in input(f"Enter row {i + 1} : ")]
@@ -99,12 +101,12 @@ def main():
             while len(puzzle[i]) > 9:
                 puzzle[i].pop(-1)
         sudoku = np.matrix(puzzle)
-        print(sudoku)
+        print_sudoku()
     start_time = time()
     try:
         solve()
     except KeyboardInterrupt:
-        print(sudoku)
+        print_sudoku()
         quit()
     finally:
         if end_time:
