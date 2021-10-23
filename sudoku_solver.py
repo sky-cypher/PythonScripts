@@ -80,9 +80,20 @@ def solve():
         quit()
     start_time += time() - end_time
 
+def validate():
+    global puzzle, sudoku
+    for i in range(9):
+        while len(puzzle[i]) < 9:
+            puzzle[i].append(0)
+        while len(puzzle[i]) > 9:
+            puzzle[i].pop(-1)
+    sudoku = np.matrix(puzzle)
+    print_sudoku()
+
+
 
 def main():
-    global sudoku, start_time
+    global sudoku, start_time, puzzle
     print_sudoku()
     if 'n' not in input("Get puzzle from file ? : ").lower():
         file_path = input("Enter file name : ")
@@ -91,17 +102,12 @@ def main():
         with open(file_path) as file:
             for i, line in enumerate(file.readlines()):
                 puzzle[i] = [ int(x) for x in line.split() ]
-        sudoku = np.matrix(puzzle)
-        print_sudoku()
+    validate()
+
     while 'n' in input("Use defined sudoku ? : ").lower():
         for i in range(9):
             puzzle[i] = [int(x) for x in input(f"Enter row {i + 1} : ")]
-            while len(puzzle[i]) < 9:
-                puzzle[i].append(0)
-            while len(puzzle[i]) > 9:
-                puzzle[i].pop(-1)
-        sudoku = np.matrix(puzzle)
-        print_sudoku()
+        validate()
     start_time = time()
     try:
         solve()
