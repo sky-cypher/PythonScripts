@@ -1,5 +1,8 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 import os
+import io
+import requests
+from datetime import datetime
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -9,13 +12,53 @@ from tensorflow.keras.layers import Dense, Dropout, LSTM
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
 
+def getData(script_code, start, end):
+    url = "https://api.bseindia.com/BseIndiaAPI/api/StockPriceCSVDownload/w"
+    params = {
+        "pageType" : "0",
+        "rbType" : "D",
+        "Scode" : str(script_code),
+        "FDates" : str(start),
+        "TDates" : str(end),
+            }
+    headers = {
+        "Host" : "api.bseindia.com",
+        "User-Agent" : "Mozilla/5.0 (X11; Linux x86_64; rv :94.0) Gecko/20100101 Firefox/94.0",
+        "Accept" : "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        "Accept-Language" : "en-US,en;q=0.5",
+        "Accept-Encoding" : "gzip, deflate, br",
+        "DNT" : "1",
+        "Connection" : "keep-alive",
+        "Referer" : "https ://www.bseindia.com/",
+        "Upgrade-Insecure-Requests" : "1",
+        "Sec-Fetch-Dest" : "document",
+        "Sec-Fetch-Mode" : "navigate",
+        "Sec-Fetch-Site" : "same-site",
+        "Sec-Fetch-User" : "?1"
+            }
+    response = requests.get(url, params=params, headers=headers)
+    return io.StringIO(response.text)
+
+
+start = datetime(2020,1,1)
+end = datetime.now()
+start = start.strftime("%d/%m/%Y")
+end = end.strftime("%d/%m/%Y")
+
 company = input("Enter company : ")
 if not company : company = 'Infosys'
 
-filename = input("Enter filename : ")
-if not filename : filename = '500209.csv'
+script_code = input("Enter script code : ")
+if not script_code : script_code = '500209'
 
-daily = pd.read_csv(filename)
+try:
+    daily = pd.read_csv(getData(script_code,start,end))
+except requests.exceptions.RequestException:
+    if 'y' in input("Read from file :").lower():
+        daily = pd.read_csv(script_code + '.csv')
+    else:
+        quit()
+
 daily["Date"] = pd.to_datetime(daily["Date"], format="%d-%B-%Y")
 daily.sort_values(by = ["Date"])
 daily.set_index("Date", inplace = True)
@@ -87,7 +130,6 @@ plt.plot(actual_prices, color='#5567d5',
 plt.plot(predicted_prices, color='#55d567',
         label=f"Predicted {company} Price")
 plt.title(f"{company} Share Price \u20b9")
-plt.xlabel('Time')
 plt.ylabel('Price')
 plt.legend()
 plt.show()
