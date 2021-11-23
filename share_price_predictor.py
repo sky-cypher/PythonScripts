@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 import os
-import io
+from io import StringIO
 import requests
-from datetime import datetime
+import datetime as dt
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -12,50 +12,44 @@ from tensorflow.keras.layers import Dense, Dropout, LSTM
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
 
+
 def getData(script_code, start, end):
-    url = "https://api.bseindia.com/BseIndiaAPI/api/StockPriceCSVDownload/w"
-    params = {
+    price_endpoint = "https://api.bseindia.com/BseIndiaAPI/api/StockPriceCSVDownload/w"
+    info_endpoint = "https://api.bseindia.com/BseIndiaAPI/api/ListofScripData/w"
+    price_params = {
         "pageType" : "0",
         "rbType" : "D",
         "Scode" : str(script_code),
         "FDates" : str(start),
         "TDates" : str(end),
             }
+    info_params = { "Scripcode" : str(script_code) }
     headers = {
         "Host" : "api.bseindia.com",
         "User-Agent" : "Mozilla/5.0 (X11; Linux x86_64; rv :94.0) Gecko/20100101 Firefox/94.0",
-        "Accept" : "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-        "Accept-Language" : "en-US,en;q=0.5",
-        "Accept-Encoding" : "gzip, deflate, br",
-        "DNT" : "1",
-        "Connection" : "keep-alive",
-        "Referer" : "https ://www.bseindia.com/",
-        "Upgrade-Insecure-Requests" : "1",
-        "Sec-Fetch-Dest" : "document",
-        "Sec-Fetch-Mode" : "navigate",
-        "Sec-Fetch-Site" : "same-site",
-        "Sec-Fetch-User" : "?1"
             }
-    response = requests.get(url, params=params, headers=headers)
-    return io.StringIO(response.text)
+    csv_data = requests.get(price_endpoint, params=price_params, headers=headers)
+    info = requests.get(info_endpoint, params=info_params, headers=headers)
+    name = info.json()[0]["Scrip_Name"][:-1]
+    return name, StringIO(csv_data.text)
 
-
-start = datetime(2020,1,1)
-end = datetime.now()
+start = dt.datetime(2020,1,1)
+end = dt.datetime.now()
+if int(end.strftime("%H")) < 16:
+    end -= dt.timedelta(days=1)
 start = start.strftime("%d/%m/%Y")
 end = end.strftime("%d/%m/%Y")
-
-company = input("Enter company : ")
-if not company : company = 'Infosys'
 
 script_code = input("Enter script code : ")
 if not script_code : script_code = '500209'
 
 try:
-    daily = pd.read_csv(getData(script_code,start,end))
+    company, daily = getData(script_code,start,end)
+    daily = pd.read_csv(daily)
 except requests.exceptions.RequestException:
     if 'y' in input("Read from file :").lower():
         daily = pd.read_csv(script_code + '.csv')
+        company = input("Enter company name : ")
     else:
         quit()
 
@@ -89,12 +83,12 @@ def train_model():
 
     model.compile(optimizer='adam', loss='mean_squared_error')
     model.fit(x_train, y_train, epochs=25, batch_size=32)
-    model.save(f'{company}_model.hdf5')
+    model.save(f'{script_code}_model.hdf5')
     return model
 
 
 try:
-    model = load_model(f'{company}_model.hdf5')
+    model = load_model(f'{script_code}_model.hdf5')
 except Exception as e:
     print(e)
     print("Training model :")
