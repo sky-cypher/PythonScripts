@@ -64,7 +64,7 @@ window.title(header)
 window.configure(bg='#2d2d2d')
 window.geometry('400x350')
 
-total = 0
+tries = 0
 right = 0
 keys = ('h','j','k','l')
 
@@ -80,8 +80,8 @@ def keypress(event):
 
 
 def update(index):
-    global total, right
-    total += 1
+    global tries, right
+    tries += 1
     explain_lbl.configure(state='normal')
     explain_lbl.delete('1.0', tk.END)
     try:
@@ -162,6 +162,6 @@ next_mcq()
 
 window.mainloop()
 try:
-    print(f"Accuracy : {round(right / total, 2) * 100}%")
+    print(f"Accuracy : {round(right / tries, 2) * 100}%")
 except ZeroDivisionError:
     print("Not played!")
