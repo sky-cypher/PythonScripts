@@ -10,8 +10,12 @@ page = input("Enter Page :")
 if not page:
     page = "artificial-intelligence-questions-answers"
 print("Fetching data ...")
-res = requests.get("https://www.sanfoundry.com/" + page)
-print("\rFetched data")
+try:
+    res = requests.get("https://www.sanfoundry.com/" + page)
+except requests.exceptions.RequestException:
+    print("Couldn't get data")
+    quit()
+print("Fetched data")
 print("Now parsing ...")
 soup = BeautifulSoup(res.content, 'lxml')
 
@@ -77,18 +81,21 @@ def keypress(event):
 
 def update(index):
     global total, right
+    total += 1
     explain_lbl.configure(state='normal')
     explain_lbl.delete('1.0', tk.END)
     try:
         answer = ord(mcq['answer'].lower()) - 97
     except TypeError:
-        explain_lbl.insert(tk.END, "Answer Unknown")
+        explain_lbl.insert(tk.END, "Answer Unknown :")
         explain_lbl['bg']='#5d5d1d'
+        explain_lbl.insert(tk.END, mcq['explanation'])
+        explain_lbl.configure(state='disabled')
+        return
 
 
     explain_lbl.insert(tk.END, mcq['explanation'])
     explain_lbl.configure(state='disabled')
-    total += 1
     if index == answer:
         explain_lbl['bg']='#1d5d1d'
         right += 1
@@ -96,10 +103,13 @@ def update(index):
         explain_lbl['bg']='#5d1d1d'
 
 def next_mcq(*event):
-    if not mcqs:
-        window.destroy()
     global mcq
-    mcq = mcqs.pop(0)
+    try:
+        mcq = mcqs.pop(0)
+    except IndexError:
+        window.destroy()
+        return
+
     explain_lbl.configure(state='normal')
     question_lbl.configure(state='normal')
     explain_lbl.delete('1.0', tk.END)
