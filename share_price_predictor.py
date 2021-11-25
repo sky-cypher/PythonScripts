@@ -14,8 +14,11 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
 
 
 def getData(script_code, start, end):
-    price_endpoint = "https://api.bseindia.com/BseIndiaAPI/api/StockPriceCSVDownload/w"
-    info_endpoint = "https://api.bseindia.com/BseIndiaAPI/api/ListofScripData/w"
+    base_url = "https://api.bseindia.com/BseIndiaAPI/api/"
+    user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv :94.0)\
+            Gecko/20100101 Firefox/94.0"
+    price_endpoint = base_url + "StockPriceCSVDownload/w"
+    info_endpoint = base_url + "ListofScripData/w"
     price_params = {
         "pageType" : "0",
         "rbType" : "D",
@@ -26,10 +29,14 @@ def getData(script_code, start, end):
     info_params = { "Scripcode" : str(script_code) }
     headers = {
         "Host" : "api.bseindia.com",
-        "User-Agent" : "Mozilla/5.0 (X11; Linux x86_64; rv :94.0) Gecko/20100101 Firefox/94.0",
+        "User-Agent" : user_agent,
             }
-    csv_data = requests.get(price_endpoint, params=price_params, headers=headers)
-    info = requests.get(info_endpoint, params=info_params, headers=headers)
+    csv_data = requests.get(price_endpoint,
+            params=price_params,
+            headers=headers)
+    info = requests.get(info_endpoint,
+            params=info_params,
+            headers=headers)
     name = info.json()[0]["Scrip_Name"][:-1]
     return name, StringIO(csv_data.text)
 
@@ -59,7 +66,8 @@ daily.set_index("Date", inplace = True)
 data = daily.head(len(daily) - 100)
 prediction_days = 60
 scaler = MinMaxScaler(feature_range=(0,1))
-scaled_data = scaler.fit_transform(data['Close Price'].values.reshape(-1,1))
+train_data = data['Close Price'].values.reshape(-1,1)
+scaled_data = scaler.fit_transform(train_data)
 
 def train_model():
     x_train = []
@@ -70,10 +78,15 @@ def train_model():
         y_train.append(scaled_data[x, 0])
 
     x_train, y_train = np.array(x_train), np.array(y_train)
-    x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
+    x_train = np.reshape(x_train,
+            (x_train.shape[0], x_train.shape[1], 1)
+            )
 
     model = Sequential()
-    model.add(LSTM(units=50, return_sequences=True, input_shape=(x_train.shape[1], 1)))
+    model.add(LSTM(units=50,
+        return_sequences=True,
+        input_shape=(x_train.shape[1], 1))
+        )
     model.add(Dropout(0.2))
     model.add(LSTM(units=50, return_sequences=True))
     model.add(Dropout(0.2))
@@ -98,8 +111,11 @@ except Exception as e:
 test_data = daily.tail(100)
 actual_prices = test_data['Close Price'].values
 
-total_dataset = pd.concat((data['Close Price'], test_data['Close Price']), axis=0)
-model_inputs = total_dataset[len(total_dataset) - len(test_data) - prediction_days:].values
+total_dataset = pd.concat(
+        (data['Close Price'], test_data['Close Price']),
+        axis=0)
+model_inputs = total_dataset[len(total_dataset)
+        - len(test_data) - prediction_days:].values
 model_inputs = model_inputs.reshape(-1, 1)
 model_inputs = scaler.transform(model_inputs)
 
@@ -110,7 +126,8 @@ x_test = np.array(x_test)
 x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1], 1))
 predicted_prices = model.predict(x_test)
 predicted_prices = scaler.inverse_transform(predicted_prices)
-print(f"Next day's {company} price : {round(float(predicted_prices[-1]), 2)}")
+next_day_price = round(float(predicted_prices[-1]), 2)
+print(f"Next day's {company} price : {next_day_price}")
 
 fig = plt.figure()
 fig.patch.set_facecolor('black')
