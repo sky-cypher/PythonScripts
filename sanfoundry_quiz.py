@@ -62,14 +62,14 @@ window.geometry('400x350')
 
 total = 0
 right = 0
+keys = ('h','j','k','l')
 
 def check(event):
     update(option_lbls.index(event.widget))
 
 def keypress(event):
-    x = ('h','j','k','l')
     try:
-        index = x.index(event.char.lower())
+        index = keys.index(event.char.lower())
         update(index)
     except ValueError:
         pass
@@ -79,10 +79,17 @@ def update(index):
     global total, right
     explain_lbl.configure(state='normal')
     explain_lbl.delete('1.0', tk.END)
+    try:
+        answer = ord(mcq['answer'].lower()) - 97
+    except TypeError:
+        explain_lbl.insert(tk.END, "Answer Unknown")
+        explain_lbl['bg']='#5d5d1d'
+
+
     explain_lbl.insert(tk.END, mcq['explanation'])
     explain_lbl.configure(state='disabled')
     total += 1
-    if index == ord(mcq['answer'].lower()) - 97 :
+    if index == answer:
         explain_lbl['bg']='#1d5d1d'
         right += 1
     else:
@@ -139,7 +146,8 @@ explain_lbl = tk.Text(window,
 explain_lbl.pack(fill=tk.X)
 question_lbl.bind('<Button-1>', next_mcq)
 window.bind('<Return>', next_mcq)
-window.bind('<Key>', keypress)
+for key in keys:
+    window.bind(key, keypress)
 next_mcq()
 
 window.mainloop()
