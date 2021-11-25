@@ -60,6 +60,8 @@ window.title(header)
 window.configure(bg='#2d2d2d')
 window.geometry('400x350')
 
+total = 0
+right = 0
 
 def check(event):
     update(option_lbls.index(event.widget))
@@ -74,16 +76,21 @@ def keypress(event):
 
 
 def update(index):
+    global total, right
     explain_lbl.configure(state='normal')
     explain_lbl.delete('1.0', tk.END)
     explain_lbl.insert(tk.END, mcq['explanation'])
     explain_lbl.configure(state='disabled')
+    total += 1
     if index == ord(mcq['answer'].lower()) - 97 :
         explain_lbl['bg']='#1d5d1d'
+        right += 1
     else:
         explain_lbl['bg']='#5d1d1d'
 
 def next_mcq(*event):
+    if not mcqs:
+        window.destroy()
     global mcq
     mcq = mcqs.pop(0)
     explain_lbl.configure(state='normal')
@@ -136,3 +143,7 @@ window.bind('<Key>', keypress)
 next_mcq()
 
 window.mainloop()
+try:
+    print(f"Accuracy : {round(right / total, 2) * 100}%")
+except ZeroDivisionError:
+    print("Not played!")
