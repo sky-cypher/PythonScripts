@@ -13,3 +13,5 @@ login form with plain password
 decrypt a jpg file which is encryped by xor method
 ## create\_classes.py
 script that writes classes in program.py
+## bill\_calculator.py
+personal file for adding 3% to amount
