@@ -5,9 +5,8 @@ avl_signes = {'jpg':bytes(jpg_sign)}
 
 fileName = input("Enter file path :")
 
-for _ in avl_signes:
-    if _ in fileName:
-        ext = _
+for ext in avl_signes:
+    if ext in fileName:
         sign = avl_signes[ext]
         break
 
