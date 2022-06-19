@@ -1,10 +1,18 @@
 #!/usr/bin/env python3
 
 import re
+import sys
+import subprocess
 from rich.console import Console
 from rich.table import Table
 
-IGNORE = 240
+if len(sys.argv) != 2:
+    print("Check Arguments")
+    exit(0)
+
+subprocess.run(
+        f"pdftotext {sys.argv[1]} grahak-bill.txt",
+        shell=True)
 
 table = Table(title="grahak-bill")
 
@@ -38,9 +46,14 @@ with open("grahak-bill.txt") as file:
         names = re.findall(r'[A-Z]+\s[A-Z]+\s[A-Z]+', content)
         bill = re.findall(r'[0-9]+\.[0-9]', content)
         for n, b in zip(names, bill):
-                table.add_row(''.join([ x.capitalize() + ' ' for x in n.split()]),
-                              calculate_bill(b , ignore = IGNORE))
+                table.add_row(
+                        ''.join(
+                            [ x.capitalize() + ' ' for x in n.split()]
+                        ),
+                        calculate_bill(b)
+                        )
 
 console = Console()
 console.print(table)
 
+subprocess.run("rm grahak-bill.txt", shell=True)
