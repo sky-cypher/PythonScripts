@@ -14,10 +14,11 @@ subprocess.run(
         f"pdftotext {sys.argv[1]} grahak-bill.txt",
         shell=True)
 
-table = Table(title="grahak-bill")
+table = Table(title="grahak-bill",show_lines=True)
 
 table.add_column("Name")
 table.add_column("Amount", style="green")
+table.add_column("Bags", style="yellow")
 
 def calculate_bill(bill, ignore = 0):
         bill = float(bill)
@@ -44,13 +45,17 @@ with open("grahak-bill.txt") as file:
                         # print(line)
 
         names = re.findall(r'[A-Z]+\s[A-Z]+\s[A-Z]+', content)
-        bill = re.findall(r'[0-9]+\.[0-9]', content)
-        for n, b in zip(names, bill):
+        bags_bill = re.findall(r'[0-9]+\s\|\s[0-9]+\.[0-9]', content)
+        bill = [ x.split()[-1] for x in bags_bill ]
+        bags = [ x.split()[0] for x in bags_bill ]
+
+        for n, b, ba in zip(names, bill, bags):
                 table.add_row(
                         ''.join(
                             [ x.capitalize() + ' ' for x in n.split()]
                         ),
-                        calculate_bill(b)
+                        calculate_bill(b) if "AARTI" not in n else b,
+                        ba
                         )
 
 console = Console()
