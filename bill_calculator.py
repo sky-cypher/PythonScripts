@@ -20,7 +20,7 @@ table.add_column("Name")
 table.add_column("Amount", style="green")
 table.add_column("Bags", style="yellow")
 
-total_commission = 0
+total = 0
 
 def calculate_bill(bill, ignore = 0):
         bill = float(bill)
@@ -30,8 +30,8 @@ def calculate_bill(bill, ignore = 0):
         temp *= 0.03
         bill += temp
         bill = int(bill)
-        global total_commission
-        total_commission += int(temp)
+        global total
+        total += bill
         return('\u20b9' + str(bill))
 
 with open("grahak-bill.txt") as file:
@@ -54,17 +54,18 @@ with open("grahak-bill.txt") as file:
         bags = [ x.split()[0] for x in bags_bill ]
 
         for n, b, ba in zip(names, bill, bags):
+                if 'AARTI' in n:
+                        continue
                 table.add_row(
                         ''.join(
                             [ x.capitalize() + ' ' for x in n.split()]
                         ),
-                        calculate_bill(b) if "AARTI" not in n else
-                        '\u20b9' + b[:-2],
+                        calculate_bill(b),
                         ba
                         )
 
 console = Console()
 console.print(table)
-print("\nTotal commission :", total_commission)
+print("\nTotal :", total)
 
 subprocess.run("rm grahak-bill.txt", shell=True)
