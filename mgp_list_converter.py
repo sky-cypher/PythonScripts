@@ -17,7 +17,7 @@ subprocess.run("rm grahak-list.txt", shell=True)
 
 print("Sr. no\tName\tQuantity\tRemark")
 for index, line in enumerate(lines):
-        if re.search(r'^\d+\s+\w+', line):
+        if re.search(r'^\d+\s+\D+', line):
                 print(line[:line.index(' ')],
                       line[line.index(' ') + 1 :].replace('\n', ''),
                       lines[index - 3],
