@@ -19,7 +19,7 @@ def calculate_bill(bill, ignore = 0):
         bill += temp
         global total_commission
         total_commission += int(temp)
-        return('\u20b9' + str(bill))
+        return('\u20b9' + str(int(bill)))
 
 
 subprocess.run(
