@@ -3,12 +3,14 @@
 import re
 import sys
 import subprocess
+import requests
+import datetime
 from rich.console import Console
 from rich.table import Table
 
-if len(sys.argv) != 2:
-        print("Check Arguments")
-        exit(0)
+date = datetime.datetime.now().strftime('%m%Y')
+if len(sys.argv) > 1:
+        date = sys.argv[1]
 
 def calculate_bill(bill, ignore = 0):
         bill = float(bill)
@@ -21,12 +23,19 @@ def calculate_bill(bill, ignore = 0):
         total_commission += int(temp)
         return('\u20b9' + str(int(bill)))
 
+url = f'https://nehainfotech.co.in/bills/16508PO_sum_{date}.pdf'
+with requests.get(url, stream=True) as response:
+        with open(f'{date}.pdf', mode='wb') as file:
+                for chunk in response.iter_content(chunk_size=10 * 1024):
+                    file.write(chunk)
 
 subprocess.run(
-        f"pdftotext {sys.argv[1]} grahak-bill.txt",
-        shell=True)
+        f"pdftotext {date}.pdf grahak-bill.txt",
+        shell=True
+)
+subprocess.run(f"rm {date}.pdf", shell=True)
 
-table = Table(title="grahak-bill",show_lines=True)
+table = Table(title=f"grahak-bill {date}", show_lines=True)
 
 table.add_column("Name")
 table.add_column("Amount", style="green")
