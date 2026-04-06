@@ -13,6 +13,9 @@ if len(sys.argv) > 1:
         date = sys.argv[1]
 
 def calculate_bill(bill, ignore = 0):
+        if(date.startswith('04')):
+            ignore = 240
+        
         bill = float(bill)
         temp = (bill - ignore) / 100
         temp = round(temp,2)
